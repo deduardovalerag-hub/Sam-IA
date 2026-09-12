@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sam IA - Calculadora</title>
+    <title>Sam IA - v1.0</title>
     <style>
         body {
             background-color: #0f172a;
@@ -28,7 +28,7 @@
             flex-direction: column;
             overflow: hidden;
             border: 1px solid #334155;
-            height: 80vh;
+            height: 85vh;
         }
         .chat-header {
             background: #0f172a;
@@ -38,6 +38,16 @@
             font-size: 18px;
             border-bottom: 1px solid #334155;
             color: #38bdf8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .app-version {
+            font-size: 11px;
+            background: #334155;
+            padding: 2px 6px;
+            border-radius: 6px;
+            color: #94a3b8;
         }
         .chat-messages {
             flex: 1;
@@ -50,7 +60,7 @@
         .message {
             padding: 10px 14px;
             border-radius: 12px;
-            max-width: 80%;
+            max-width: 85%;
             line-height: 1.4;
             font-size: 14px;
         }
@@ -102,12 +112,15 @@
 <body>
 
     <div class="chat-container">
-        <div class="chat-header">Sam IA</div>
+        <div class="chat-header">
+            <span>Sam IA</span>
+            <span class="app-version">v1.0</span>
+        </div>
         <div class="chat-messages" id="chatMessages">
-            <div class="message ai">Hola, soy Sam IA. Escribe una operación matemática (ej. <b>5 * 8</b>, <b>100 / 4</b>, o <b>raiz 9</b>) y te daré el resultado.</div>
+            <div class="message ai">Hola, soy Sam IA (v1.0). Escribe <b>"mundial"</b> o un idioma (ej. <b>"mundial ingles"</b>, <b>"japones"</b>, <b>"frances"</b>, <b>"portugues"</b>) para ver el reloj mundial, o haz operaciones matemáticas.</div>
         </div>
         <div class="chat-input-area">
-            <input type="text" id="userInput" placeholder="Escribe tu operación..." autocomplete="off">
+            <input type="text" id="userInput" placeholder="Escribe tu mensaje..." autocomplete="off">
             <button onclick="procesarMensaje()">Enviar</button>
         </div>
     </div>
@@ -138,15 +151,62 @@
             inputField.value = '';
 
             setTimeout(() => {
-                let respuesta = calcular(texto);
+                let respuesta = obtenerRespuesta(texto);
                 agregarMensaje(respuesta, 'ai');
             }, 300);
         }
 
-        function calcular(expr) {
+        function obtenerRespuesta(expr) {
+            let limpio = expr.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+
+            // Mostrar versión si lo pregunta
+            if (limpio.includes('version') || limpio.includes('versio')) {
+                return "Actualmente estoy ejecutando la versión <b>v1.0</b> de Sam IA.";
+            }
+
+            let idioma = 'es';
+            let titulo = "<b>🌍 Reloj Mundial (v1.0):</b><br><br>";
+
+            if (limpio.includes('ingles') || limpio.includes('english')) {
+                idioma = 'en';
+                titulo = "<b>🌍 World Clock (v1.0):</b><br><br>";
+            } else if (limpio.includes('frances') || limpio.includes('french')) {
+                idioma = 'fr';
+                titulo = "<b>🌍 Horloge Mondiale (v1.0) :</b><br><br>";
+            } else if (limpio.includes('japones') || limpio.includes('japanese')) {
+                idioma = 'ja';
+                titulo = "<b>🌍 世界時計 v1.0:</b><br><br>";
+            } else if (limpio.includes('portugues') || limpio.includes('portuguese')) {
+                idioma = 'pt';
+                titulo = "<b>🌍 Relógio Mundial (v1.0):</b><br><br>";
+            }
+
+            if (limpio.includes('mundial') || limpio.includes('paises') || limpio.includes('reloj') || limpio.includes('horas') || limpio.includes('ingles') || limpio.includes('frances') || limpio.includes('japones') || limpio.includes('portugues')) {
+                const zonas = [
+                    { nombre: { es: '🇲🇽 México (CDMX)', en: '🇲🇽 Mexico (CDMX)', fr: '🇲🇽 Mexique (CDMX)', ja: '🇲🇽 メキシコ (CDMX)', pt: '🇲🇽 México (CDMX)' }, zona: 'America/Mexico_City' },
+                    { nombre: { es: '🇺🇸 Estados Unidos (Nueva York)', en: '🇺🇸 United States (New York)', fr: '🇺🇸 États-Unis (New York)', ja: '🇺🇸 アメリカ (ニューヨーク)', pt: '🇺🇸 Estados Unidos (Nova York)' }, zona: 'America/New_York' },
+                    { nombre: { es: '🇪🇸 España (Madrid)', en: '🇪🇸 Spain (Madrid)', fr: '🇪🇸 Espagne (Madrid)', ja: '🇪🇸 スペイン (マドリード)', pt: '🇪🇸 Espanha (Madrid)' }, zona: 'Europe/Madrid' },
+                    { nombre: { es: '🇦🇷 Argentina (Buenos Aires)', en: '🇦🇷 Argentina (Buenos Aires)', fr: '🇦🇷 Argentine (Buenos Aires)', ja: '🇦🇷 アルゼンチン (ブエノスアイレス)', pt: '🇦🇷 Argentina (Buenos Aires)' }, zona: 'America/Argentina/Buenos_Aires' },
+                    { nombre: { es: '🇯🇵 Japón (Tokio)', en: '🇯🇵 Japan (Tokyo)', fr: '🇯🇵 Japon (Tokyo)', ja: '🇯🇵 日本 (東京)', pt: '🇯🇵 Japão (Tóquio)' }, zona: 'Asia/Tokyo' },
+                    { nombre: { es: '🇫🇷 Francia (París)', en: '🇫🇷 France (Paris)', fr: '🇫🇷 France (Paris)', ja: '🇫🇷 フランス (パリ)', pt: '🇫🇷 França (Paris)' }, zona: 'Europe/Paris' },
+                    { nombre: { es: '🇨🇴 Colombia (Bogotá)', en: '🇨🇴 Colombia (Bogota)', fr: '🇨🇴 Colombie (Bogota)', ja: '🇨🇴 コロンビア (ボゴタ)', pt: '🇨🇴 Colômbia (Bogotá)' }, zona: 'America/Bogota' },
+                    { nombre: { es: '🇧🇷 Brasil (São Paulo)', en: '🇧🇷 Brazil (São Paulo)', fr: '🇧🇷 Brésil (São Paulo)', ja: '🇧🇷 ブラジル (サンパウロ)', pt: '🇧🇷 Brasil (São Paulo)' }, zona: 'America/Sao_Paulo' }
+                ];
+
+                let resultadoHtml = titulo;
+                zonas.forEach(item => {
+                    let horaZona = new Date().toLocaleTimeString(idioma === 'en' ? 'en-US' : idioma === 'fr' ? 'fr-FR' : idioma === 'ja' ? 'ja-JP' : idioma === 'pt' ? 'pt-BR' : 'es-ES', { timeZone: item.zona });
+                    resultadoHtml += `• ${item.nombre[idioma] || item.nombre['es']}: <b>${horaZona}</b><br>`;
+                });
+                return resultadoHtml;
+            }
+
+            if (limpio.includes('hora') || limpio.includes('quehoraes')) {
+                const horaActual = new Date().toLocaleTimeString();
+                return `La hora local actual es: <b>${horaActual}</b>`;
+            }
+
             try {
-                let limpio = expr.toLowerCase().replace(/\s+/g, '');
-                
                 if (limpio.startsWith('raiz')) {
                     let num = parseFloat(limpio.replace('raiz', '').replace(/[()]/g, ''));
                     if (isNaN(num)) return "Por favor ingresa un número válido para la raíz.";
@@ -155,18 +215,18 @@
                 }
 
                 if (!/^[\d+\-*/().%\s]+$/.test(limpio)) {
-                    return "Solo puedo procesar operaciones matemáticas básicas (suma, resta, multiplicación, división, porcentajes y raíces con 'raiz').";
+                    return "Escribe una operación matemática, <b>'mundial'</b>, o pregunta por la <b>'version'</b>.";
                 }
 
                 let resultado = Function('"use strict";return (' + limpio + ')')();
                 
                 if (!isFinite(resultado)) {
-                    return "Error matemático (como división por cero).";
+                    return "Error matemático (división por cero).";
                 }
 
                 return `El resultado es: <b>${resultado}</b>`;
             } catch (error) {
-                return "No entendí esa operación. Inténtalo de nuevo.";
+                return "No entendí eso. Prueba escribiendo 'mundial' o 'version'.";
             }
         }
     </script>
