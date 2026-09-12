@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sam IA - Calculadora</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            background: #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #334155;
+            height: 80vh;
+        }
+        .chat-header {
+            background: #0f172a;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            border-bottom: 1px solid #334155;
+            color: #38bdf8;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .message {
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+        .message.ai {
+            background: #334155;
+            color: #f8fafc;
+            align-self: flex-start;
+        }
+        .message.user {
+            background: #0284c7;
+            color: #ffffff;
+            align-self: flex-end;
+        }
+        .chat-input-area {
+            display: flex;
+            padding: 12px;
+            background: #0f172a;
+            border-top: 1px solid #334155;
+            gap: 8px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: #f8fafc;
+            font-size: 14px;
+            outline: none;
+        }
+        input[type="text"]:focus {
+            border-color: #38bdf8;
+        }
+        button {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #0369a1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">Sam IA</div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai">Hola, soy Sam IA. Escribe una operación matemática (ej. <b>5 * 8</b>, <b>100 / 4</b>, o <b>raiz 9</b>) y te daré el resultado.</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="userInput" placeholder="Escribe tu operación..." autocomplete="off">
+            <button onclick="procesarMensaje()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        const inputField = document.getElementById('userInput');
+        const chatMessages = document.getElementById('chatMessages');
+
+        inputField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                procesarMensaje();
+            }
+        });
+
+        function agregarMensaje(texto, tipo) {
+            const div = document.createElement('div');
+            div.className = `message ${tipo}`;
+            div.innerHTML = texto;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function procesarMensaje() {
+            const texto = inputField.value.trim();
+            if (!texto) return;
+
+            agregarMensaje(texto, 'user');
+            inputField.value = '';
+
+            setTimeout(() => {
+                let respuesta = calcular(texto);
+                agregarMensaje(respuesta, 'ai');
+            }, 300);
+        }
+
+        function calcular(expr) {
+            try {
+                let limpio = expr.toLowerCase().replace(/\s+/g, '');
+                
+                if (limpio.startsWith('raiz')) {
+                    let num = parseFloat(limpio.replace('raiz', '').replace(/[()]/g, ''));
+                    if (isNaN(num)) return "Por favor ingresa un número válido para la raíz.";
+                    if (num < 0) return "No puedo calcular raíces cuadradas de números negativos.";
+                    return `El resultado es: ${Math.sqrt(num)}`;
+                }
+
+                if (!/^[\d+\-*/().%\s]+$/.test(limpio)) {
+                    return "Solo puedo procesar operaciones matemáticas básicas (suma, resta, multiplicación, división, porcentajes y raíces con 'raiz').";
+                }
+
+                let resultado = Function('"use strict";return (' + limpio + ')')();
+                
+                if (!isFinite(resultado)) {
+                    return "Error matemático (como división por cero).";
+                }
+
+                return `El resultado es: <b>${resultado}</b>`;
+            } catch (error) {
+                return "No entendí esa operación. Inténtalo de nuevo.";
+            }
+        }
+    </script>
+
+</body>
+</html>
