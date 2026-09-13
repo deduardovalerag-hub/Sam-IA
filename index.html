@@ -3,11 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sam IA - v1.0</title>
+    <title>Sam IA - v1.9</title>
     <style>
+        /* Variables de color por defecto (Modo Azul Oscuro Original) */
+        :root {
+            --bg-body: #0f172a;
+            --bg-container: #1e293b;
+            --bg-header: #0f172a;
+            --border-color: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-color: #38bdf8;
+            --btn-bg: #0284c7;
+            --btn-hover: #0369a1;
+            --btn-cancel-bg: #dc2626;
+            --btn-cancel-hover: #b91c1c;
+            --msg-ai-bg: #334155;
+            --msg-ai-text: #f8fafc;
+            --msg-user-bg: #0284c7;
+            --msg-user-text: #ffffff;
+            --input-bg: #1e293b;
+            --input-border: #475569;
+        }
+
+        /* Tema Negro (Invertido: Fondo negro puro, acentos oscuros y cajas/textos invertidos) */
+        [data-theme="dark"] {
+            --bg-body: #000000;
+            --bg-container: #0a0a0a;
+            --bg-header: #121212;
+            --border-color: #262626;
+            --text-main: #ffffff;
+            --text-muted: #a3a3a3;
+            --accent-color: #ffffff;
+            --btn-bg: #262626;
+            --btn-hover: #404040;
+            --btn-cancel-bg: #dc2626;
+            --btn-cancel-hover: #b91c1c;
+            --msg-ai-bg: #171717;
+            --msg-ai-text: #ffffff;
+            --msg-user-bg: #ffffff;
+            --msg-user-text: #000000;
+            --input-bg: #121212;
+            --input-border: #262626;
+        }
+
+        /* Tema Claro (Blanco) */
+        [data-theme="light"] {
+            --bg-body: #f1f5f9;
+            --bg-container: #ffffff;
+            --bg-header: #e2e8f0;
+            --border-color: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent-color: #0284c7;
+            --btn-bg: #0284c7;
+            --btn-hover: #0369a1;
+            --btn-cancel-bg: #dc2626;
+            --btn-cancel-hover: #b91c1c;
+            --msg-ai-bg: #e2e8f0;
+            --msg-ai-text: #0f172a;
+            --msg-user-bg: #0284c7;
+            --msg-user-text: #ffffff;
+            --input-bg: #f8fafc;
+            --input-border: #cbd5e1;
+        }
+
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
+            background-color: var(--bg-body);
+            color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             flex-direction: column;
@@ -17,38 +80,108 @@
             margin: 0;
             padding: 15px;
             box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
         }
         .chat-container {
+            position: relative;
             width: 100%;
             max-width: 400px;
-            background: #1e293b;
+            background: var(--bg-container);
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 1px solid #334155;
+            border: 1px solid var(--border-color);
             height: 85vh;
+            transition: background 0.3s, border-color 0.3s;
         }
         .chat-header {
-            background: #0f172a;
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
-            border-bottom: 1px solid #334155;
-            color: #38bdf8;
+            background: var(--bg-header);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .menu-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            line-height: 1;
+        }
+        .menu-btn:hover {
+            background: var(--border-color);
+            color: var(--text-main);
+        }
+        .header-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--accent-color);
         }
         .app-version {
             font-size: 11px;
-            background: #334155;
+            background: var(--border-color);
             padding: 2px 6px;
             border-radius: 6px;
-            color: #94a3b8;
+            color: var(--text-muted);
         }
+
+        /* Menú desplegable */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 12px;
+            background: var(--bg-container);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            width: 170px;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .dropdown-item {
+            padding: 10px 14px;
+            font-size: 14px;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .dropdown-item:hover {
+            background: var(--border-color);
+            color: var(--accent-color);
+        }
+
+        /* Vistas */
+        .view-section {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* Área de Chat */
         .chat-messages {
             flex: 1;
             padding: 15px;
@@ -65,123 +198,432 @@
             font-size: 14px;
         }
         .message.ai {
-            background: #334155;
-            color: #f8fafc;
+            background: var(--msg-ai-bg);
+            color: var(--msg-ai-text);
             align-self: flex-start;
+            border: 1px solid var(--border-color);
+        }
+        .message.ai.thinking {
+            font-style: italic;
+            opacity: 0.8;
         }
         .message.user {
-            background: #0284c7;
-            color: #ffffff;
+            background: var(--msg-user-bg);
+            color: var(--msg-user-text);
             align-self: flex-end;
         }
         .chat-input-area {
             display: flex;
             padding: 12px;
-            background: #0f172a;
-            border-top: 1px solid #334155;
+            background: var(--bg-header);
+            border-top: 1px solid var(--border-color);
             gap: 8px;
         }
-        input[type="text"] {
+        input[type="text"], select {
             flex: 1;
             padding: 10px 14px;
-            background: #1e293b;
-            border: 1px solid #475569;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
             border-radius: 8px;
-            color: #f8fafc;
+            color: var(--text-main);
             font-size: 14px;
             outline: none;
         }
-        input[type="text"]:focus {
-            border-color: #38bdf8;
+        input[type="text"]:focus, select:focus {
+            border-color: var(--accent-color);
         }
-        button {
-            background: #0284c7;
-            color: white;
-            border: none;
+        button.action-btn {
+            background: var(--btn-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
             padding: 10px 16px;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
             transition: background 0.2s;
         }
-        button:hover {
-            background: #0369a1;
+        button.action-btn:hover {
+            background: var(--btn-hover);
+        }
+        button.action-btn.cancel {
+            background: var(--btn-cancel-bg);
+            color: #ffffff;
+            border: none;
+        }
+        button.action-btn.cancel:hover {
+            background: var(--btn-cancel-hover);
+        }
+
+        /* Vistas de Configuración y Apariencia */
+        .settings-container {
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .settings-option {
+            background: var(--bg-header);
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .settings-option label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="color"] {
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: transparent;
+        }
+        .back-btn {
+            background: var(--border-color);
+            color: var(--text-main);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .back-btn:hover {
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
 
     <div class="chat-container">
+        <!-- Encabezado con menú de tres puntos -->
         <div class="chat-header">
-            <span>Sam IA</span>
-            <span class="app-version">v1.0</span>
+            <div class="header-left">
+                <button class="menu-btn" onclick="toggleMenu(event)" title="Configuración">⋮</button>
+                <span class="header-title" id="headerTitle">Sam IA</span>
+            </div>
+            <span class="app-version">v1.9</span>
+
+            <!-- Menú Desplegable -->
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-item" onclick="abrirGeneral()">⚙️ General</div>
+                <div class="dropdown-item" onclick="abrirApariencia()">🎨 Apariencia</div>
+                <div class="dropdown-item" onclick="opcionMenu('🌐 Ajustes de Idioma')">🌐 Idioma</div>
+                <div class="dropdown-item" onclick="opcionMenu('ℹ️ Sam IA v1.9 - Listo para usar')">ℹ️ Acerca de</div>
+            </div>
         </div>
-        <div class="chat-messages" id="chatMessages">
-            <div class="message ai">Hola, soy Sam IA (v1.0). Escribe <b>"mundial"</b> o un idioma (ej. <b>"mundial ingles"</b>, <b>"japones"</b>, <b>"frances"</b>, <b>"portugues"</b>) para ver el reloj mundial, o haz operaciones matemáticas.</div>
+
+        <!-- VISTA DE CHAT -->
+        <div id="chatView" class="view-section">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai">¡Hola! Soy Sam IA (v1.9). Puedes platicar conmigo, preguntarme la hora, pedirme el reloj mundial o hacer cálculos matemáticos. ¿En qué te ayudo hoy?</div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" id="userInput" placeholder="Escribe tu mensaje..." autocomplete="off">
+                <button class="action-btn" id="actionBtn" onclick="manejadorAccion()">Enviar</button>
+            </div>
         </div>
-        <div class="chat-input-area">
-            <input type="text" id="userInput" placeholder="Escribe tu mensaje..." autocomplete="off">
-            <button onclick="procesarMensaje()">Enviar</button>
+
+        <!-- VISTA DE CONFIGURACIÓN GENERAL -->
+        <div id="generalView" class="view-section hidden">
+            <div class="settings-container">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; color: var(--accent-color);">⚙️ Configuración General</h3>
+                    <button class="back-btn" onclick="volverAlChat()">← Volver</button>
+                </div>
+                <hr style="border: 0; border-top: 1px solid var(--border-color); width: 100%; margin: 5px 0;">
+                
+                <div class="settings-option">
+                    <label for="notif">Notificaciones del Chat</label>
+                    <input type="checkbox" id="notif" checked>
+                </div>
+                
+                <div class="settings-option">
+                    <label for="autoScroll">Desplazamiento automático</label>
+                    <input type="checkbox" id="autoScroll" checked>
+                </div>
+
+                <div class="settings-option">
+                    <label for="sound">Efectos de sonido</label>
+                    <input type="checkbox" id="sound">
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA DE APARIENCIA -->
+        <div id="aparienciaView" class="view-section hidden">
+            <div class="settings-container">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; color: var(--accent-color);">🎨 Personalizar Apariencia</h3>
+                    <button class="back-btn" onclick="volverAlChat()">← Volver</button>
+                </div>
+                <hr style="border: 0; border-top: 1px solid var(--border-color); width: 100%; margin: 5px 0;">
+                
+                <!-- COLOR DE SISTEMA -->
+                <div class="settings-option" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                    <label for="themeSelect">Color de Sistema</label>
+                    <select id="themeSelect" onchange="cambiarTema(this.value)" style="width: 100%; box-sizing: border-box;">
+                        <option value="system">Sistema por defecto (Azul)</option>
+                        <option value="dark">Negro</option>
+                        <option value="light">Blanco</option>
+                    </select>
+                </div>
+
+                <!-- COLOR DE LETRAS DE LA IA -->
+                <div class="settings-option">
+                    <label for="aiTextColor">Color de letras de la IA</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="aiTextColor" value="#f8fafc" onchange="cambiarColorLetraIA(this.value)">
+                    </div>
+                </div>
+
+                <!-- COLOR DE LETRAS DEL USUARIO -->
+                <div class="settings-option">
+                    <label for="userTextColor">Color de tus letras</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="userTextColor" value="#ffffff" onchange="cambiarColorLetraUsuario(this.value)">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const inputField = document.getElementById('userInput');
         const chatMessages = document.getElementById('chatMessages');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const actionBtn = document.getElementById('actionBtn');
+        
+        const chatView = document.getElementById('chatView');
+        const generalView = document.getElementById('generalView');
+        const aparienciaView = document.getElementById('aparienciaView');
+        const headerTitle = document.getElementById('headerTitle');
 
-        inputField.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                procesarMensaje();
+        let estaPensando = false;
+        let temporizadorPensamiento = null;
+        let elementoMensajeAI = null;
+
+        function toggleMenu(event) {
+            event.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!dropdownMenu.contains(e.target)) {
+                dropdownMenu.classList.remove('show');
             }
         });
 
-        function agregarMensaje(texto, tipo) {
+        function ocultarVistas() {
+            chatView.classList.add('hidden');
+            generalView.classList.add('hidden');
+            aparienciaView.classList.add('hidden');
+        }
+
+        function abrirGeneral() {
+            dropdownMenu.classList.remove('show');
+            ocultarVistas();
+            generalView.classList.remove('hidden');
+            headerTitle.innerText = "General";
+        }
+
+        function abrirApariencia() {
+            dropdownMenu.classList.remove('show');
+            ocultarVistas();
+            aparienciaView.classList.remove('hidden');
+            headerTitle.innerText = "Apariencia";
+        }
+
+        function volverAlChat() {
+            ocultarVistas();
+            chatView.classList.remove('hidden');
+            headerTitle.innerText = "Sam IA";
+        }
+
+        function opcionMenu(mensaje) {
+            dropdownMenu.classList.remove('show');
+            volverAlChat();
+            agregarMensaje(mensaje, 'ai');
+        }
+
+        // Funciones de Apariencia
+        function cambiarTema(val) {
+            if (val === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('aiTextColor').value = '#0f172a';
+                document.getElementById('userTextColor').value = '#ffffff';
+                cambiarColorLetraIA('#0f172a');
+                cambiarColorLetraUsuario('#ffffff');
+            } else if (val === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('aiTextColor').value = '#ffffff';
+                document.getElementById('userTextColor').value = '#000000';
+                cambiarColorLetraIA('#ffffff');
+                cambiarColorLetraUsuario('#000000');
+            } else if (val === 'system') {
+                document.documentElement.removeAttribute('data-theme');
+                document.getElementById('aiTextColor').value = '#f8fafc';
+                document.getElementById('userTextColor').value = '#ffffff';
+                cambiarColorLetraIA('#f8fafc');
+                cambiarColorLetraUsuario('#ffffff');
+            }
+        }
+
+        function cambiarColorLetraIA(color) {
+            document.documentElement.style.setProperty('--msg-ai-text', color);
+        }
+
+        function cambiarColorLetraUsuario(color) {
+            document.documentElement.style.setProperty('--msg-user-text', color);
+        }
+
+        inputField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                manejadorAccion();
+            }
+        });
+
+        function manejadorAccion() {
+            if (estaPensando) {
+                cancelarPensamiento();
+            } else {
+                procesarMensaje();
+            }
+        }
+
+        function agregarMensaje(texto, tipo, esPensando = false) {
             const div = document.createElement('div');
-            div.className = `message ${tipo}`;
+            div.className = `message ${tipo}` + (esPensando ? ' thinking' : '');
             div.innerHTML = texto;
             chatMessages.appendChild(div);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+            return div;
         }
 
         function procesarMensaje() {
             const texto = inputField.value.trim();
             if (!texto) return;
 
+            // 1. Mostrar mensaje del usuario
             agregarMensaje(texto, 'user');
             inputField.value = '';
 
-            setTimeout(() => {
+            // 2. Estado pensando
+            estaPensando = true;
+            actionBtn.innerText = 'Cancelar';
+            actionBtn.classList.add('cancel');
+
+            // 3. Crear mensaje temporal
+            elementoMensajeAI = agregarMensaje('Pensando...', 'ai', true);
+
+            // 4. Tiempo de reflexión (2.5 segundos)
+            temporizadorPensamiento = setTimeout(() => {
                 let respuesta = obtenerRespuesta(texto);
-                agregarMensaje(respuesta, 'ai');
-            }, 300);
+                if (elementoMensajeAI) {
+                    elementoMensajeAI.innerHTML = respuesta;
+                    elementoMensajeAI.classList.remove('thinking');
+                }
+                restablecerBoton();
+            }, 2500);
         }
 
-        function obtenerRespuesta(expr) {
-            let limpio = expr.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+        function cancelarPensamiento() {
+            if (temporizadorPensamiento) {
+                clearTimeout(temporizadorPensamiento);
+            }
+            if (elementoMensajeAI) {
+                elementoMensajeAI.innerHTML = '<i>Respuesta cancelada por el usuario.</i>';
+                elementoMensajeAI.classList.remove('thinking');
+            }
+            restablecerBoton();
+        }
 
-            // Mostrar versión si lo pregunta
-            if (limpio.includes('version') || limpio.includes('versio')) {
-                return "Actualmente estoy ejecutando la versión <b>v1.0</b> de Sam IA.";
+        function restablecerBoton() {
+            estaPensando = false;
+            temporizadorPensamiento = null;
+            elementoMensajeAI = null;
+            actionBtn.innerText = 'Enviar';
+            actionBtn.classList.remove('cancel');
+        }
+
+        function obtenerRespuesta(promptOriginal) {
+            let limpio = promptOriginal.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            let sinEspacios = limpio.replace(/\s+/g, '');
+
+            // --- SECCIÓN DE CONVERSACIÓN CASUAL ---
+            if (limpio.includes('hola') || limpio.includes('buenas') || limpio.includes('buenos dias') || limpio.includes('buenas noches') || limpio.includes('buenas tardes') || limpio.includes('hey')) {
+                const saludos = [
+                    "¡Hola! ¿Cómo estás?",
+                    "¡Hola! Qué gusto saludarte. ¿En qué puedo ayudarte?",
+                    "¡Buenas! ¿Cómo va todo por allá?"
+                ];
+                return saludos[Math.floor(Math.random() * saludos.length)];
+            }
+
+            if (limpio.includes('como estas') || limpio.includes('como te va') || limpio.includes('que tal') || limpio.includes('como andas')) {
+                const estados = [
+                    "¡Todo excelente por aquí! Listo para ayudarte con lo que necesites. ¿Tú cómo estás?",
+                    "¡Muy bien, gracias por preguntar! ¿En qué te puedo colaborar hoy?",
+                    "¡Excelente! Funcionando al 100%. ¿Qué tal tu día?"
+                ];
+                return estados[Math.floor(Math.random() * estados.length)];
+            }
+
+            if (limpio.includes('bien') || limpio.includes('excelente') || limpio.includes('super') || limpio.includes('genial')) {
+                if (limpio.length < 25) {
+                    return "¡Me alegra mucho saber eso! 😊 ¿Hay algo en lo que te pueda ayudar hoy?";
+                }
+            }
+
+            if (limpio.includes('como te llamas') || limpio.includes('quien eres') || limpio.includes('tu nombre')) {
+                return "Mi nombre es <b>Sam IA</b>. Soy tu asistente virtual interactivo.";
+            }
+
+            if (limpio.includes('gracias') || limpio.includes('muchas gracias') || limpio.includes('agradecido')) {
+                return "¡De nada! Es un placer ayudarte. 😊";
+            }
+
+            if (limpio.includes('adios') || limpio.includes('hasta luego') || limpio.includes('chao') || limpio.includes('nos vemos')) {
+                return "¡Hasta luego! Que tengas un excelente día. 👋";
+            }
+
+            if (limpio.includes('que haces') || limpio.includes('que puedes hacer')) {
+                return "Puedo conversar contigo, realizar cálculos matemáticos, mostrarte la hora de varios países del mundo y personalizar mi apariencia. ¡Pruébame!";
+            }
+
+            // --- SECCIÓN DE COMANDOS ESPECIALES ---
+            if (sinEspacios.includes('version') || sinEspacios.includes('versio')) {
+                return "Actualmente estoy ejecutando la versión <b>v1.9</b> de Sam IA.";
             }
 
             let idioma = 'es';
-            let titulo = "<b>🌍 Reloj Mundial (v1.0):</b><br><br>";
+            let titulo = "<b>🌍 Reloj Mundial (v1.9):</b><br><br>";
 
-            if (limpio.includes('ingles') || limpio.includes('english')) {
+            if (sinEspacios.includes('ingles') || sinEspacios.includes('english')) {
                 idioma = 'en';
-                titulo = "<b>🌍 World Clock (v1.0):</b><br><br>";
-            } else if (limpio.includes('frances') || limpio.includes('french')) {
+                titulo = "<b>🌍 World Clock (v1.9):</b><br><br>";
+            } else if (sinEspacios.includes('frances') || sinEspacios.includes('french')) {
                 idioma = 'fr';
-                titulo = "<b>🌍 Horloge Mondiale (v1.0) :</b><br><br>";
-            } else if (limpio.includes('japones') || limpio.includes('japanese')) {
+                titulo = "<b>🌍 Horloge Mondiale (v1.9) :</b><br><br>";
+            } else if (sinEspacios.includes('japones') || sinEspacios.includes('japanese')) {
                 idioma = 'ja';
-                titulo = "<b>🌍 世界時計 v1.0:</b><br><br>";
-            } else if (limpio.includes('portugues') || limpio.includes('portuguese')) {
+                titulo = "<b>🌍 世界時計 v1.9:</b><br><br>";
+            } else if (sinEspacios.includes('portugues') || sinEspacios.includes('portuguese')) {
                 idioma = 'pt';
-                titulo = "<b>🌍 Relógio Mundial (v1.0):</b><br><br>";
+                titulo = "<b>🌍 Relógio Mundial (v1.9):</b><br><br>";
             }
 
-            if (limpio.includes('mundial') || limpio.includes('paises') || limpio.includes('reloj') || limpio.includes('horas') || limpio.includes('ingles') || limpio.includes('frances') || limpio.includes('japones') || limpio.includes('portugues')) {
+            if (sinEspacios.includes('mundial') || sinEspacios.includes('paises') || sinEspacios.includes('reloj') || sinEspacios.includes('horas') || sinEspacios.includes('ingles') || sinEspacios.includes('frances') || sinEspacios.includes('japones') || sinEspacios.includes('portugues')) {
                 const zonas = [
                     { nombre: { es: '🇲🇽 México (CDMX)', en: '🇲🇽 Mexico (CDMX)', fr: '🇲🇽 Mexique (CDMX)', ja: '🇲🇽 メキシコ (CDMX)', pt: '🇲🇽 México (CDMX)' }, zona: 'America/Mexico_City' },
                     { nombre: { es: '🇺🇸 Estados Unidos (Nueva York)', en: '🇺🇸 United States (New York)', fr: '🇺🇸 États-Unis (New York)', ja: '🇺🇸 アメリカ (ニューヨーク)', pt: '🇺🇸 Estados Unidos (Nova York)' }, zona: 'America/New_York' },
@@ -201,33 +643,39 @@
                 return resultadoHtml;
             }
 
-            if (limpio.includes('hora') || limpio.includes('quehoraes')) {
+            if (sinEspacios.includes('hora') || sinEspacios.includes('quehoraes')) {
                 const horaActual = new Date().toLocaleTimeString();
                 return `La hora local actual es: <b>${horaActual}</b>`;
             }
 
+            // --- SECCIÓN DE EVALUACIÓN MATEMÁTICA ---
             try {
-                if (limpio.startsWith('raiz')) {
-                    let num = parseFloat(limpio.replace('raiz', '').replace(/[()]/g, ''));
+                let exprMatematica = sinEspacios
+                    .replace(/mas|sumadoa/g, '+')
+                    .replace(/menos|restadoa/g, '-')
+                    .replace(/por|multiplicadopor/g, '*')
+                    .replace(/entre|divididopor|divididoentre/g, '/');
+
+                if (exprMatematica.startsWith('raiz')) {
+                    let num = parseFloat(exprMatematica.replace('raiz', '').replace(/[()]/g, ''));
                     if (isNaN(num)) return "Por favor ingresa un número válido para la raíz.";
                     if (num < 0) return "No puedo calcular raíces cuadradas de números negativos.";
-                    return `El resultado es: ${Math.sqrt(num)}`;
+                    return `El resultado de la raíz es: <b>${Math.sqrt(num)}</b>`;
                 }
 
-                if (!/^[\d+\-*/().%\s]+$/.test(limpio)) {
-                    return "Escribe una operación matemática, <b>'mundial'</b>, o pregunta por la <b>'version'</b>.";
+                if (/^[\d+\-*/().%\s]+$/.test(exprMatematica)) {
+                    let resultado = Function('"use strict";return (' + exprMatematica + ')')();
+                    if (!isFinite(resultado)) {
+                        return "Error matemático (división por cero).";
+                    }
+                    return `El resultado es: <b>${resultado}</b>`;
                 }
-
-                let resultado = Function('"use strict";return (' + limpio + ')')();
-                
-                if (!isFinite(resultado)) {
-                    return "Error matemático (división por cero).";
-                }
-
-                return `El resultado es: <b>${resultado}</b>`;
             } catch (error) {
-                return "No entendí eso. Prueba escribiendo 'mundial' o 'version'.";
+                // Si falla la matemática no hacemos nada y dejamos pasar a la respuesta por defecto
             }
+
+            // Respuesta predeterminada conversacional si nada encajó
+            return "No estoy seguro de haber entendido eso. Puedes saludarme, hacerme una operación matemática (ej: 5 por 5) o pedirme la hora escribiendo 'mundial'.";
         }
     </script>
 
