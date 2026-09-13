@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sam IA con Almacenamiento</title>
+    <style>
+        :root {
+            --bg-body: #0f172a;
+            --bg-container: #1e293b;
+            --bg-header: #0f172a;
+            --border-color: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-color: #38bdf8;
+            --btn-bg: #0284c7;
+            --btn-hover: #0369a1;
+            --btn-cancel-bg: #dc2626;
+            --btn-cancel-hover: #b91c1c;
+            --msg-ai-bg: #334155;
+            --msg-ai-text: #f8fafc;
+            --msg-user-bg: #0284c7;
+            --msg-user-text: #ffffff;
+            --input-bg: #1e293b;
+            --input-border: #475569;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            background: var(--bg-container);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            height: 85vh;
+            position: relative;
+        }
+
+        .chat-header {
+            background: var(--bg-header);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--accent-color);
+        }
+
+        .clear-btn {
+            background: var(--btn-cancel-bg);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .clear-btn:hover {
+            background: var(--btn-cancel-hover);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 85%;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .message.ai {
+            background: var(--msg-ai-bg);
+            color: var(--msg-ai-text);
+            align-self: flex-start;
+            border: 1px solid var(--border-color);
+        }
+
+        .message.ai.thinking {
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        .message.user {
+            background: var(--msg-user-bg);
+            color: var(--msg-user-text);
+            align-self: flex-end;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 12px;
+            background: var(--bg-header);
+            border-top: 1px solid var(--border-color);
+            gap: 8px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+        }
+
+        button.action-btn {
+            background: var(--btn-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button.action-btn.cancel {
+            background: var(--btn-cancel-bg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <span class="header-title">Sam IA</span>
+            <button class="clear-btn" onclick="borrarHistorial()">Borrar Chat</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <!-- Los mensajes guardados o por defecto se cargarán aquí mediante JavaScript -->
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="userInput" placeholder="Escribe tu mensaje..." autocomplete="off">
+            <button class="action-btn" id="actionBtn" onclick="manejadorAccion()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        const inputField = document.getElementById('userInput');
+        const chatMessages = document.getElementById('chatMessages');
+        const actionBtn = document.getElementById('actionBtn');
+
+        const CLAVE_ALMACENAMIENTO = 'sam_ia_historial_chat';
+        let historialChat = [];
+        let estaPensando = false;
+        let temporizadorPensamiento = null;
+        let elementoMensajeAI = null;
+
+        // Cargar historial al iniciar la aplicación
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarHistorial();
+        });
+
+        function cargarHistorial() {
+            const datosGuardados = localStorage.getItem(CLAVE_ALMACENAMIENTO);
+            if (datosGuardados) {
+                historialChat = JSON.parse(datosGuardados);
+                chatMessages.innerHTML = '';
+                historialChat.forEach(msg => {
+                    renderizarElemento(msg.texto, msg.tipo);
+                });
+            } else {
+                // Mensaje inicial por defecto
+                const mensajeInicial = { texto: '¡Hola! Soy Sam IA. ¿En qué te puedo ayudar hoy?', tipo: 'ai' };
+                historialChat.push(mensajeInicial);
+                guardarEnStorage();
+                renderizarElemento(mensajeInicial.texto, mensajeInicial.tipo);
+            }
+        }
+
+        function guardarEnStorage() {
+            localStorage.setItem(CLAVE_ALMACENAMIENTO, JSON.stringify(historialChat));
+        }
+
+        function guardarMensaje(texto, tipo) {
+            historialChat.push({ texto, tipo });
+            guardarEnStorage();
+        }
+
+        function renderizarElemento(texto, tipo, esPensando = false) {
+            const div = document.createElement('div');
+            div.className = `message ${tipo}` + (esPensando ? ' thinking' : '');
+            div.innerHTML = texto;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return div;
+        }
+
+        function manejadorAccion() {
+            if (estaPensando) {
+                cancelarPensamiento();
+            } else {
+                procesarMensaje();
+            }
+        }
+
+        function procesarMensaje() {
+            const texto = inputField.value.trim();
+            if (!texto) return;
+
+            // Mostrar y guardar mensaje del usuario
+            renderizarElemento(texto, 'user');
+            guardarMensaje(texto, 'user');
+            inputField.value = '';
+
+            estaPensando = true;
+            actionBtn.innerText = 'Cancelar';
+            actionBtn.classList.add('cancel');
+
+            // Crear elemento temporal de "Pensando..." (no se guarda en storage)
+            elementoMensajeAI = renderizarElemento('Pensando...', 'ai', true);
+
+            temporizadorPensamiento = setTimeout(() => {
+                let respuesta = obtenerRespuesta(texto);
+                if (elementoMensajeAI) {
+                    elementoMensajeAI.innerHTML = respuesta;
+                    elementoMensajeAI.classList.remove('thinking');
+                    // Al finalizar la respuesta de la IA, la guardamos
+                    guardarMensaje(respuesta, 'ai');
+                }
+                restablecerBoton();
+            }, 2000);
+        }
+
+        function cancelarPensamiento() {
+            if (temporizadorPensamiento) {
+                clearTimeout(temporizadorPensamiento);
+            }
+            if (elementoMensajeAI) {
+                const mensajeCancelado = '<i>Respuesta cancelada por el usuario.</i>';
+                elementoMensajeAI.innerHTML = mensajeCancelado;
+                elementoMensajeAI.classList.remove('thinking');
+                guardarMensaje(mensajeCancelado, 'ai');
+            }
+            restablecerBoton();
+        }
+
+        function restablecerBoton() {
+            estaPensando = false;
+            temporizadorPensamiento = null;
+            elementoMensajeAI = null;
+            actionBtn.innerText = 'Enviar';
+            actionBtn.classList.remove('cancel');
+        }
+
+        function borrarHistorial() {
+            localStorage.removeItem(CLAVE_ALMACENAMIENTO);
+            historialChat = [];
+            chatMessages.innerHTML = '';
+            cargarHistorial();
+        }
+
+        function obtenerRespuesta(promptOriginal) {
+            let limpio = promptOriginal.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+            if (limpio.includes('hola')) return "¡Hola! ¿Cómo estás?";
+            if (limpio.includes('gracias')) return "¡Con gusto! Aquí estaré si necesitas algo más.";
+
+            return "Entendido. He registrado tu mensaje en la memoria del dispositivo.";
+        }
+
+        inputField.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') manejadorAccion();
+        });
+    </script>
+</body>
+</html>
